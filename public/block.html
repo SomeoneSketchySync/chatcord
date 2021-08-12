@@ -1,0 +1,7 @@
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  const { username } = Qs.parse(location.search, {
+    ignoreQueryPrefix: true,
+  });
+  socket.emit("block", { username: username })
+</script>

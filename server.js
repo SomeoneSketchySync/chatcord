@@ -14,6 +14,10 @@ const app = express();
 const server = http.createServer(app);
 const io = socketio(server);
 
+const adminUser = process.env['adminUser']
+
+var blocked = [];
+
 // Set static folder
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -30,12 +34,14 @@ io.on('connection', socket => {
     socket.emit('message', formatMessage(botName, 'Welcome to ChatCord!'));
 
     // Broadcast when a user connects
-    socket.broadcast
-      .to(user.room)
-      .emit(
-        'message',
-        formatMessage(botName, `${user.username} has joined the chat`)
-      );
+    if (!blocked.includes(user.username)) {
+      socket.broadcast
+        .to(user.room)
+        .emit(
+          'message',
+          formatMessage(botName, `${user.username} has joined the chat`)
+        );
+    }
 
     // Send users and room info
     io.to(user.room).emit('roomUsers', {
@@ -43,6 +49,10 @@ io.on('connection', socket => {
       users: getRoomUsers(user.room)
     });
   });
+
+  socket.on('block', username => {
+    block.push(username.username);
+  })
 
   // Listen for chatMessage
   socket.on('chatMessage', msg => {
