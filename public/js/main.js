@@ -28,6 +28,11 @@ socket.on('message', (message) => {
   chatMessages.scrollTop = chatMessages.scrollHeight;
 });
 
+socket.on('blocked', message => {
+  document.body.innerHTML = "BLOCKED!";
+  window.location.href = "https://axel.xcode101.repl.co/"
+})
+
 // Message submit
 chatForm.addEventListener('submit', (e) => {
   e.preventDefault();

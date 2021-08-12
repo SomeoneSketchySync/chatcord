@@ -27,27 +27,27 @@ const botName = 'ChatCord Bot';
 io.on('connection', socket => {
   socket.on('joinRoom', ({ username, room }) => {
     const user = userJoin(socket.id, username, room);
+    if (blocked.includes(user.username)) {
+      socket.join(user.room);
 
-    socket.join(user.room);
+      // Welcome current user
+      socket.emit('message', formatMessage(botName, 'Welcome to ChatCord!'));
 
-    // Welcome current user
-    socket.emit('message', formatMessage(botName, 'Welcome to ChatCord!'));
-
-    // Broadcast when a user connects
-    if (!blocked.includes(user.username)) {
+      // Broadcast when a user connects
       socket.broadcast
         .to(user.room)
         .emit(
           'message',
           formatMessage(botName, `${user.username} has joined the chat`)
         );
+        
+      io.to(user.room).emit('roomUsers', {
+        room: user.room,
+        users: getRoomUsers(user.room)
+      });
+    } else {
+      socket.emit('blocked')
     }
-
-    // Send users and room info
-    io.to(user.room).emit('roomUsers', {
-      room: user.room,
-      users: getRoomUsers(user.room)
-    });
   });
 
   socket.on('block', username => {
